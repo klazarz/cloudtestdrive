@@ -14,9 +14,7 @@ Work is currently underway to make the scripts a more processor architecture ind
  
 As such currently the scripts will test to see if the cloud shell instance is running on an ARM or x64 architecture, if it detects an ARM based architecture the script will stop. You will then need to switch to an x64 based architecture. Use the Actions menu for the cloud shell (the upper left menu of the cloud shell window) then chose architecture, then chose an x64 based architecture. The cloud shell will restart (the downloads and home directory will remain). Note that not all tenancies support this option (the `Always Free` tenancies do not, but they don't have the resources to run Kubernetes clusters either) and unfortunately for those tenancies this lab is currently now available.
 
-By default the OCI Cloud shell does not have access to the internet, however this is needed for the lab as you will download some scripts to configure your environment, these scripts will also need to access the internet to download docker images and other things. Thus we need to enable the cloud shell public internet access
-
-https://docs.oracle.com/en-us/iaas/Content/API/Concepts/cloudshellintro_topic-Cloud_Shell_Networking.htm
+By default the OCI Cloud shell does not have access to the internet, however this is needed for the lab as you will download some scripts to configure your environment, these scripts will also need to access the internet to download docker images and other things. Thus we need to enable the cloud shell public internet access. If you are an admin in your tenancy you can achieve this by clicking the "Network" dropdown on the upper left of the cloud shell pane, then select "Public network". It will take a short time for the cloud shell to switch. If this option is not available, or you cannot pull the git repo (as below) then you will need to set policies enabled to let you access the cloud shell. [Please see the cloud shell networking documentation.](https://docs.oracle.com/en-us/iaas/Content/API/Concepts/cloudshellintro_topic-Cloud_Shell_Networking.htm)
 
 ## Task 1: Downloading the latest scripts
 

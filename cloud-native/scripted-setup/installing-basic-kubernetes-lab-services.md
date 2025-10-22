@@ -12,6 +12,16 @@ To use the scripts to setup the core Kubernetes services
 
 ### Prerequisites
 
+**IMORTANT** Cloud shell processor architecture and networking
+
+The OCI cloud shell supports the creation of cloud shell instances using both ARM and X64 based architectures, however these scripts are currently setup to download only x64 based executables, to build x64 based containers and create x64 based clusters.
+
+Work is currently underway to make the scripts a more processor architecture independent (or at least to work against both ARM and x64 based processor architectures) however this involves updating the download process, the build process, the cluster setup process and also ensuring that both x64 and ARM based versions of all of the containers that are used as available. This means that the work will take some time to complete.
+ 
+As such currently the scripts will test to see if the cloud shell instance is running on an ARM or x64 architecture, if it detects an ARM based architecture the script will stop. You will then need to switch to an x64 based architecture. Use the Actions menu for the cloud shell (the upper left menu of the cloud shell window) then chose architecture, then chose an x64 based architecture. The cloud shell will restart (the downloads and home directory will remain). Note that not all tenancies support this option (the `Always Free` tenancies do not, but they don't have the resources to run Kubernetes clusters either) and unfortunately for those tenancies this lab is currently now available.
+
+By default the OCI Cloud shell does not have access to the internet, however this is needed for the lab as you will download some scripts to configure your environment, these scripts will also need to access the internet to download docker images and other things. Thus we need to enable the cloud shell public internet access. If you are an admin in your tenancy you can achieve this by clicking the "Network" dropdown on the upper left of the cloud shell pane, then select "Public network". It will take a short time for the cloud shell to switch. If this option is not available, or you cannot pull the git repo (as below) then you will need to set policies enabled to let you access the cloud shell. [Please see the cloud shell networking documentation.](https://docs.oracle.com/en-us/iaas/Content/API/Concepts/cloudshellintro_topic-Cloud_Shell_Networking.htm)
+
 You must have setup the compartment, database (including setting up the labs user and downloading the Wallet.zip file) and Kubernetes cluster (including downloading the kubectl config file, and naming the clusters context as "one"). You can have done this by hand or by using the scripts as detailed in the **Setting up the OCI environment using scripts** module.
 
 ### When not to use these scripts 
