@@ -1,20 +1,17 @@
-![](../../images/customer.logo2.png)
+![Title image](../../images/customer.logo2.png)
 
-# Set up the OKE lab environment with scripts for free trial accounts
+
+# Set up the OCI Cloud shell architecture and access the internet
 
 ## Introduction
 
-Estimated time to complete this module 20 minutes
+Estimated time to complete this module 5 minutes
 
 ### Objectives
 
-This module walks you through the process of setting up the core OCI features needed for all of the related labs.
+This module walks you through the process of configuring the cloud shell processor architecture and setting up policies to allow it to access the internet. 
 
-To speed things up for people who are just starting with this set of labs (or deleted their previously created environment) we have provided some scripts that you can use to set things up quickly, consistently and with less opportunity for typos.
-
-### Prerequisites
-
-You have an OCI tenancy setup.
+The OCI Cloud shell is used to provide a known environment for these labs, this means that you don't need to configure and install things in your own systems and can do the lab using a web browser.
 
 **IMORTANT** Cloud shell processor architecture and networking
 
@@ -25,6 +22,12 @@ Work is currently underway to make the scripts a more processor architecture ind
 As such currently the scripts will test to see if the cloud shell instance is running on an ARM or x64 architecture, if it detects an ARM based architecture the script will stop. You will then need to switch to an x64 based architecture. Use the Actions menu for the cloud shell (the upper left menu of the cloud shell window) then chose architecture, then chose an x64 based architecture. The cloud shell will restart (the downloads and home directory will remain). Note that not all tenancies support this option (the `Always Free` tenancies do not, but they don't have the resources to run Kubernetes clusters either) and unfortunately for those tenancies this lab is currently now available.
 
 By default the OCI Cloud shell does not have access to the internet, however this is needed for the lab as you will download some scripts to configure your environment, these scripts will also need to access the internet to download docker images and other things. Thus we need to enable the cloud shell public internet access. If you are an admin in your tenancy you can achieve this by clicking the "Network" dropdown on the upper left of the cloud shell pane, then select "Public network". It will take a short time for the cloud shell to switch. If this option is not available, or you cannot pull the git repo (as below) then you will need to set policies enabled to let you access the cloud shell. [Please see the cloud shell networking documentation.](https://docs.oracle.com/en-us/iaas/Content/API/Concepts/cloudshellintro_topic-Cloud_Shell_Networking.htm)
+
+### Prerequisites
+
+You have an OCI tenancy setup and if changes are needed are an administrator.
+
+
 
 ### Copy tags
 
