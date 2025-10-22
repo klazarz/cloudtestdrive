@@ -275,7 +275,7 @@ Firstly we need to create a namespace for the ingress controller.
 2.  Run the following command to install **ingress-nginx** using Helm 3:
   
     ```bash
-    <copy>helm install ingress-nginx ingress-nginx/ingress-nginx --namespace ingress-nginx --version 4.10.0 --set rbac.create=true  --set controller.service.annotations."service\.beta\.kubernetes\.io/oci-load-balancer-protocol"=TCP --set controller.service.annotations."service\.beta\.kubernetes\.io/oci-load-balancer-shape"=flexible --set controller.service.annotations."service\.beta\.kubernetes\.io/oci-load-balancer-shape-flex-min"=10  --set controller.service.annotations."service\.beta\.kubernetes\.io/oci-load-balancer-shape-flex-max"=10</copy>
+    <copy>helm install ingress-nginx ingress-nginx/ingress-nginx --namespace ingress-nginx --version 4.12.3 --set rbac.create=true  --set controller.service.annotations."service\.beta\.kubernetes\.io/oci-load-balancer-protocol"=TCP --set controller.service.annotations."service\.beta\.kubernetes\.io/oci-load-balancer-shape"=flexible --set controller.service.annotations."service\.beta\.kubernetes\.io/oci-load-balancer-shape-flex-min"=10  --set controller.service.annotations."service\.beta\.kubernetes\.io/oci-load-balancer-shape-flex-max"=10</copy>
     ```
   
     Example Output
@@ -412,7 +412,7 @@ export EXTERNAL_IP=[External IP]
 1.  To install the dashboard we will be using the environment variable `EXTERNAL_IP` which we earlier set to the IP address of the Load balancer of the Ingress controller service. The variable `$EXTERNAL_IP` in the test below will be replaced by the value you set it to when the command is run. **IMPORTANT** if you have for any reason had to create a new cloud shell that variable will need to be setup again. 
   
     ```bash
-    <copy>helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard  --namespace kube-system --set app.ingress.enabled=true --set app.ingress.ingressClassName=nginx --set app.ingress.hosts="{dashboard.kube-system.$EXTERNAL_IP.nip.io}" --version 7.1.2</copy>
+    <copy>helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard  --namespace kube-system --set app.ingress.enabled=true --set app.ingress.ingressClassName=nginx --set app.ingress.hosts="{dashboard.kube-system.$EXTERNAL_IP.nip.io}" --set kong.image.repository=docker.io/library/kong --version 7.13.0</copy>
     ```
     
     Example Output
@@ -504,6 +504,8 @@ The helm options are :
 
 - `--set app.ingress.enabled=true`,  `--set app.ingress.ingressClassName=nginx` and ` --set app.ingress.hosts="{dashboard.kube-system.$EXTERNAL_IP.nip.io}"` These tell helm to configure an ingress rule. This rule (we'll see more in ingress rules in a bit) basically tells the nginx ingress controller we installed earlier how to identify requests to the dashboard, and send them to the dashboard service.
 
+- `--set kong.image.repository=docker.io/library/kong` This tells helm the server that the kong image (used as part of the dashboard web procy) is located. In Kubernetes 1.34 you need to specify the location of an image in full if there are multiple repositories (e.g. `container-registry.oracle.com` - a service provided by oracle for some commonly used images to reduce the pod startup time) and `docker.io` (used by many helm charts for their images) in this case we are directing it to use the image at `docker.io/library/kong` At the time of writing the helm chart used image version 3.8 so the actual image would be `docker.io/library/kong:3.8` but of course the specific version will change over time.
+
 - `--version 7.1.2` This tells helm to use a specific version of the helm chart.
 
 ---
@@ -534,48 +536,78 @@ The helm options are :
     Example Output
 
     ```
-    NAME                                       READY   STATUS    RESTARTS   AGE
-    pod/coredns-78f8cf49d4-8pq5c               1/1     Running   0          3d23h
-    pod/kube-dns-autoscaler-9f6b6c9c9-76tw5    1/1     Running   0          3d23h
-    pod/kube-flannel-ds-5kn8m                  1/1     Running   1          3d23h
-    pod/kube-flannel-ds-bqmct                  1/1     Running   1          3d23h
-    pod/kube-proxy-dlpln                       1/1     Running   0          3d23h
-    pod/kube-proxy-tzgzp                       1/1     Running   0          3d23h
-    pod/kubernetes-dashboard-bfdf5fc85-djnvb   1/1     Running   0          66s
-    pod/proxymux-client-b8cdk                  1/1     Running   0          3d23h
-    pod/proxymux-client-dnzv8                  1/1     Running   0          3d23h
+    NAME                                                        READY   STATUS    RESTARTS   AGE
+    pod/coredns-6ffb95b897-7x67n                                1/1     Running   0          126m
+    pod/coredns-6ffb95b897-jpvhx                                1/1     Running   0          121m
+    pod/coredns-6ffb95b897-zfpkr                                1/1     Running   0          121m
+    pod/csi-oci-node-2vxdn                                      1/1     Running   0          122m
+    pod/csi-oci-node-7s9b8                                      1/1     Running   0          122m
+    pod/csi-oci-node-cklpj                                      1/1     Running   0          122m
+    pod/kube-dns-autoscaler-95cd79788-gc8vh                     1/1     Running   0          126m
+    pod/kube-flannel-ds-7j7r4                                   1/1     Running   0          122m
+    pod/kube-flannel-ds-mjjl9                                   1/1     Running   0          122m
+    pod/kube-flannel-ds-rkn4q                                   1/1     Running   0          122m
+    pod/kube-proxy-8qm9z                                        1/1     Running   0          122m
+    pod/kube-proxy-kjq48                                        1/1     Running   0          122m
+    pod/kube-proxy-v8wlz                                        1/1     Running   0          122m
+    pod/kubernetes-dashboard-api-5f765b69bd-k26dd               1/1     Running   0          48m
+    pod/kubernetes-dashboard-auth-697bbb88cd-glddn              1/1     Running   0          48m
+    pod/kubernetes-dashboard-kong-69cf4bd965-492rz              1/1     Running   0          48m
+    pod/kubernetes-dashboard-metrics-scraper-85448cbcc4-76s5x   1/1     Running   0          48m
+    pod/kubernetes-dashboard-web-64858895c5-6s7jq               1/1     Running   0          48m
+    pod/metrics-server-6747dbd846-jlk6z                         1/1     Running   0          48m
+    pod/proxymux-client-6gl9b                                   1/1     Running   0          122m
+    pod/proxymux-client-f8tj7                                   1/1     Running   0          122m
+    pod/proxymux-client-nl7l7                                   1/1     Running   0          122m
+    
+    NAME                                           TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)                  AGE
+    service/kube-dns                               ClusterIP   10.96.5.5       <none>        53/UDP,53/TCP,9153/TCP   126m
+    service/kubernetes-dashboard-api               ClusterIP   10.96.112.197   <none>        8000/TCP                 48m
+    service/kubernetes-dashboard-auth              ClusterIP   10.96.11.244    <none>        8000/TCP                 48m
+    service/kubernetes-dashboard-kong-proxy        ClusterIP   10.96.127.140   <none>        443/TCP                  48m
+    service/kubernetes-dashboard-metrics-scraper   ClusterIP   10.96.234.144   <none>        8000/TCP                 48m
+    service/kubernetes-dashboard-web               ClusterIP   10.96.89.32     <none>        8000/TCP                 48m
+    service/metrics-server                         ClusterIP   10.96.166.183   <none>        443/TCP                  48m
+    service/oke-nvidia-dcgm-exporter               ClusterIP   10.96.196.145   <none>        9400/TCP                 126m
 
+    NAME                                      DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR                                 AGE
+    daemonset.apps/csi-oci-node               3         3         3       3            3           <none>                                        126m
+    daemonset.apps/kube-flannel-ds            3         3         3       3            3           <none>                                        126m
+    daemonset.apps/kube-proxy                 3         3         3       3            3           beta.kubernetes.io/os=linux                   126m
+    daemonset.apps/node-termination-handler   0         0         0       0            0           oci.oraclecloud.com/oke-is-preemptible=true   126m
+    daemonset.apps/nvidia-gpu-device-plugin   0         0         0       0            0           <none>                                        126m
+    daemonset.apps/oke-nvidia-dcgm-exporter   0         0         0       0            0           <none>                                        126m
+    daemonset.apps/proxymux-client            3         3         3       3            3           node.info.ds_proxymux_client=true             126m
 
-    NAME                           TYPE           CLUSTER-IP     EXTERNAL-IP       PORT(S)                  AGE
-    service/kube-dns               ClusterIP      10.96.5.5      <none>            53/UDP,53/TCP,9153/TCP   3d23h
-    service/kubernetes-dashboard   LoadBalancer   10.96.104.87   158.101.177.127   443:32169/TCP            66s
-
-    NAME                                          DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR                       AGE
-    daemonset.apps/kube-flannel-ds                2         2         2       2            2           beta.kubernetes.io/arch=amd64       3d23h
-    daemonset.apps/kube-proxy                     2         2         2       2            2           beta.kubernetes.io/os=linux         3d23h
-    daemonset.apps/nvidia-gpu-device-plugin       0         0         0       0            0           <none>                              3d23h
-    daemonset.apps/nvidia-gpu-device-plugin-1-8   0         0         0       0            0           <none>                              3d23h
-    daemonset.apps/proxymux-client                2         2         2       2            2           node.info.ds_proxymux_client=true   3d23h
-
-    NAME                                   READY   UP-TO-DATE   AVAILABLE   AGE
-    deployment.apps/coredns                1/1     1            1           3d23h
-    deployment.apps/kube-dns-autoscaler    1/1     1            1           3d23h
-    deployment.apps/kubernetes-dashboard   1/1     1            1           66s
-
-    NAME                                             DESIRED   CURRENT   READY   AGE
-    replicaset.apps/coredns-78f8cf49d4               1         1         1       3d23h
-    replicaset.apps/kube-dns-autoscaler-9f6b6c9c9    1         1         1       3d23h
-    replicaset.apps/kubernetes-dashboard-bfdf5fc85   1         1         1       66s
+    NAME                                                   READY   UP-TO-DATE   AVAILABLE   AGE
+    deployment.apps/coredns                                3/3     3            3           126m
+    deployment.apps/kube-dns-autoscaler                    1/1     1            1           126m
+    deployment.apps/kubernetes-dashboard-api               1/1     1            1           48m
+    deployment.apps/kubernetes-dashboard-auth              1/1     1            1           48m
+    deployment.apps/kubernetes-dashboard-kong              1/1     1            1           48m
+    deployment.apps/kubernetes-dashboard-metrics-scraper   1/1     1            1           48m
+    deployment.apps/kubernetes-dashboard-web               1/1     1            1           48m
+    deployment.apps/metrics-server                         1/1     1            1           48m
+    
+    NAME                                                              DESIRED   CURRENT   READY   AGE
+    replicaset.apps/coredns-6ffb95b897                                3         3         3       126m
+    replicaset.apps/kube-dns-autoscaler-95cd79788                     1         1         1       126m
+    replicaset.apps/kubernetes-dashboard-api-5f765b69bd               1         1         1       48m
+    replicaset.apps/kubernetes-dashboard-auth-697bbb88cd              1         1         1       48m
+    replicaset.apps/kubernetes-dashboard-kong-69cf4bd965              1         1         1       48m
+    replicaset.apps/kubernetes-dashboard-metrics-scraper-85448cbcc4   1         1         1       48m
+    replicaset.apps/kubernetes-dashboard-web-64858895c5               1         1         1       48m
+    replicaset.apps/metrics-server-6747dbd846                         1         1         1       48m
     ```
     
     We see all the elements of the dashboard: a pod, a replica set, a deployment and a service.
 
     If you want more detailed information then you can extract it, for example to get the details on the pods do the following
 
-5.  Execute below command, replacing the ID with the ID of your pod. You can get the ID of your pod by looking at the output from the previous kubectl command, in the pods list for a pod starting kubernetes-dashboard.
+5.  Execute below command, replacing the ID with the ID of your pod. You can get the ID of your pod by looking at the output from the previous kubectl command, in the pods list for a pod starting kubernetes-dashboard-web.
   
     ```bash
-    kubectl get pod kubernetes-dashboard-bfdf5fc85-djnvb  -n kube-system -o yaml
+    kubectl get pod kubernetes-dashboard-web-64858895c5-6s7jq  -n kube-system -o yaml
     ```
 
     Example Ouutput
@@ -584,37 +616,42 @@ The helm options are :
     apiVersion: v1
     kind: Pod
     metadata:
-      annotations:
-        seccomp.security.alpha.kubernetes.io/pod: runtime/default
-      creationTimestamp: "2020-09-30T19:28:17Z"
-      generateName: kubernetes-dashboard-bfdf5fc85-djnvb
+      creationTimestamp: "2025-10-22T15:21:43Z"
+      generateName: kubernetes-dashboard-web-64858895c5-
+      generation: 1
       labels:
-        app.kubernetes.io/component: kubernetes-dashboard
+        app.kubernetes.io/component: web
         app.kubernetes.io/instance: kubernetes-dashboard
         app.kubernetes.io/managed-by: Helm
-        app.kubernetes.io/name: kubernetes-dashboard
-        app.kubernetes.io/version: 2.0.4
-        helm.sh/chart: kubernetes-dashboard-2.8.0
-        pod-template-hash: 866ddb74dc
-      name: kubernetes-dashboard-866ddb74dc-7t7zz
+        app.kubernetes.io/name: kubernetes-dashboard-web
+        app.kubernetes.io/part-of: kubernetes-dashboard
+        app.kubernetes.io/version: 1.7.0
+        helm.sh/chart: kubernetes-dashboard-7.13.0
+        pod-template-hash: 64858895c5
+      name: kubernetes-dashboard-web-64858895c5-6s7jq
       namespace: kube-system
       ownerReferences:
       - apiVersion: apps/v1
         blockOwnerDeletion: true
         controller: true
         kind: ReplicaSet
-        name: kubernetes-dashboard-866ddb74dc
-        uid: f468b51e-7ccd-403c-8b1d-76b4ba34286f
-      resourceVersion: "5280"
-      selfLink: /api/v1/namespaces/kube-system/pods/kubernetes-dashboard-866ddb74dc-7t7zz
-      uid: 78773476-3b42-4be5-a20c-d159a1fa4129
+        name: kubernetes-dashboard-web-64858895c5
+        uid: 8e0884f3-d447-40b9-a088-dfcaf8a695f8
+      resourceVersion: "25266"
+      uid: 554ca30d-d66c-4d33-b239-0679295e91ab
     spec:
+      automountServiceAccountToken: true
       containers:
       - args:
         - --namespace=kube-system
-        - --auto-generate-certificates
-        image: kubernetesui/dashboard:v2.0.4
-     (lots more lines of output)
+        - --settings-config-map-name=kubernetes-dashboard-web-settings
+        env:
+        - name: GOMAXPROCS
+          valueFrom:
+            resourceFieldRef:
+              divisor: "1"
+              resource: limits.cpu
+    (Many more lines of output)
     ```
 
     If you want the output in json then replace the -o yaml with -o json.
@@ -624,13 +661,13 @@ The helm options are :
 6.  Get a specific element from a configuration, replacing the pod ID of course :
   
     ```bash
-    kubectl get pod kubernetes-dashboard-bfdf5fc85-djnvb  -n kube-system -o=jsonpath='{.spec.containers[0].image}'
+    kubectl get pod kubernetes-dashboard-web-64858895c5-6s7jq  -n kube-system -o=jsonpath='{.spec.containers[0].image}'
     ```
 
     Example Output
     
     ```
-    kubernetesui/dashboard:v2.0.4
+    docker.io/kubernetesui/dashboard-web:1.7.0
     ```
 
     (This is correct at the time of writing, but as the Kubernetes dashboard updates over time that the version will change) 
@@ -639,31 +676,31 @@ The helm options are :
 
     We can use this coupled with kubectl to identify the specific pods associated with a service, for example 
 
-7.  Run this to get the selectors used by the dashboard service
+7.  Run this to get the selectors used by the dashboard web service
    
     ```bash
-    <copy>kubectl get service kubernetes-dashboard -n kube-system -o=jsonpath='{.spec.selector}'</copy>
+    <copy>kubectl get service kubernetes-dashboard-web  -n kube-system -o=jsonpath='{.spec.selector}'</copy>
     ```
 
     Example Output
 
     ```
-    map[app.kubernetes.io/component:kubernetes-dashboard app.kubernetes.io/instance:kubernetes-dashboard app.kubernetes.io/name:kubernetes-dashboard]
+    {"app.kubernetes.io/instance":"kubernetes-dashboard","app.kubernetes.io/name":"kubernetes-dashboard-web","app.kubernetes.io/part-of":"kubernetes-dashboard"}
     ```
 
-    Tells us that any thing with label app.kubernetes.io/name (or /component of /instance) matching kubernetes-dashboard and label release matching kubernetes-dashboard will be part of the service
+    Tells us that any thing with label app.kubernetes.io/instance (or /name, or /part-of) matching kubernetes-dashboard (or kubernetes-dashboard-web)
 
 8. Get the list of pods providing the dashboard service by name (the service just goes by it's name, no random identifiers added to it)
   
     ```bash
-    <copy>kubectl get pod -n kube-system --selector=app.kubernetes.io/name=kubernetes-dashboard</copy>
+    <copy>kubectl get pod -n kube-system --selector=app.kubernetes.io/name=kubernetes-dashboard-web</copy>
     ```
     
     Example Output
 
     ```
     NAME                                    READY   STATUS    RESTARTS   AGE
-    kubernetes-dashboard-bfdf5fc85-djnvb   1/1     Running   0          43m
+    kubernetes-dashboard-web-64858895c5-6s7jq   1/1     Running   0          43m
     ```
 
 ### Task 3C: Setting up the Kubernetes dashboard user

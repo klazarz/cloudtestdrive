@@ -68,7 +68,7 @@ For now we are going to use the simplest approach of the metrics server.
 3.  In the OCI Cloud Shell install the metrics server by typing
   
     ```bash
-    <copy>helm install metrics-server metrics-server/metrics-server --version 3.12.0</copy>
+    <copy>helm install metrics-server metrics-server/metrics-server --version 3.12.2</copy>
     ```
     
     Example Output
